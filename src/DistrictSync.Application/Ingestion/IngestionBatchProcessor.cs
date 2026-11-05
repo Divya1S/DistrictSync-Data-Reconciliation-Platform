@@ -96,7 +96,9 @@ public sealed class IngestionBatchProcessor(
             }
 
             batch = await ReloadAsync(batchId, ct);
-            batch.Complete(total, totals.Inserted + totals.Updated + totals.Deleted + softDeleted, rejected, totals.Unchanged, clock.GetUtcNow());
+            // Accepted counts rows from this batch only. Records soft-deleted because a snapshot no longer contains
+            // them are a side effect of the load, not rows of it, so accepted can never exceed total.
+            batch.Complete(total, totals.Inserted + totals.Updated + totals.Deleted, rejected, totals.Unchanged, clock.GetUtcNow());
             await db.SaveChangesAsync(ct);
 
             logger.LogInformation(

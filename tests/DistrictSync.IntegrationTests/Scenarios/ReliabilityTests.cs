@@ -1,4 +1,6 @@
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using DistrictSync.Application.Common;
 using DistrictSync.Application.Tenancy;
@@ -238,14 +240,36 @@ public class ReliabilityTests(DistrictSyncStack stack)
     public async Task Outbox_rows_are_marked_processed_after_publish()
     {
         var client = await stack.ClientForAsync("northgate", "alice");
-        var health = await DistrictSyncStack.WaitUntilAsync(() => client.GetFromJsonAsync<OutboxHealthDto>("/api/v1/operations/outbox", Ct)!, h => h!.Pending == 0, timeout: TimeSpan.FromSeconds(30), what: "outbox drain");
-        health!.Pending.ShouldBe(0);
+        var sources = (await client.GetFromJsonAsync<List<SourceSystemDto>>("/api/v1/source-systems", Ct))!;
+        var directory = sources.Single(s => s.Code == "DIRECTORY");
+
+        // Produce an outbox message of our own (an upload raises "batch received") so the scenario does not
+        // depend on which other scenarios happened to run before it.
+        var unique = $"E{Guid.NewGuid():N}"[..12];
+        var csv = Encoding.UTF8.GetBytes(
+            "employee_id,work_email,first_name,last_name,department,job_title,annual_salary,phone,status,hire_date,last_modified\n" +
+            $"{unique},{unique.ToLowerInvariant()}@northgate.edu,Out,Box,IT,Analyst,50000,555-010-0001,Active,2020-01-01,2026-10-01T09:00:00Z\n");
+        using var content = new MultipartFormDataContent();
+        content.Add(new ByteArrayContent(csv) { Headers = { ContentType = new MediaTypeHeaderValue("text/csv") } }, "file", "outbox.csv");
+        var upload = await client.PostAsync($"/api/v1/ingestion/batches/csv?sourceSystemId={directory.Id}&entityType=Employee", content, Ct);
+        upload.EnsureSuccessStatusCode();
+        var batch = (await upload.Content.ReadFromJsonAsync<IngestionBatchDto>(Ct))!;
+        var batchId = batch.Id.ToString("D");
 
         await using var scope = stack.WorkerServices.CreateAsyncScope();
         scope.ServiceProvider.GetRequiredService<TenantContext>().SetSystem("test");
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var processed = await db.OutboxMessages.AsNoTracking().CountAsync(m => m.ProcessedAt != null, Ct);
-        processed.ShouldBeGreaterThan(0);
+
+        // The row written in the upload's transaction must be published and stamped as processed.
+        var receivedType = EventCatalog.NameOf<IngestionBatchReceivedEvent>();
+        var rows = await DistrictSyncStack.WaitUntilAsync(
+            () => db.OutboxMessages.AsNoTracking().Where(m => m.Type == receivedType && m.Payload.Contains(batchId)).ToListAsync(Ct),
+            found => found.Count == 1 && found[0].ProcessedAt is not null,
+            what: "outbox row for the uploaded batch");
+        rows.ShouldHaveSingleItem().ProcessedAt.ShouldNotBeNull();
+
+        var health = await DistrictSyncStack.WaitUntilAsync(() => client.GetFromJsonAsync<OutboxHealthDto>("/api/v1/operations/outbox", Ct)!, h => h!.Pending == 0, timeout: TimeSpan.FromSeconds(30), what: "outbox drain");
+        health!.Pending.ShouldBe(0);
     }
 
     /// <summary>A case needs a real discrepancy and run behind it (the API joins them); builds that chain for the ambient tenant.</summary>
@@ -254,6 +278,10 @@ public class ReliabilityTests(DistrictSyncStack stack)
         var sources = await db.SourceSystems.OrderBy(s => s.Code).Take(2).ToListAsync(Ct);
         var run = ReconciliationRun.Request(tenantId, "Employee", sources[0].Id, sources[1].Id, null, "test", openedAt);
         run.ClearDomainEvents();
+
+        // This run only exists to parent the discrepancy. Left Queued it would count against the tenant's
+        // concurrent-run quota and could block scenarios that request real runs later.
+        run.Cancel(openedAt);
         var discrepancy = Discrepancy.Detect(tenantId, run.Id, "Employee", DiscrepancyType.FieldConflict, $"case-{Guid.NewGuid():N}", sources[0].Id, sources[1].Id, null, null, [new FieldDifference("salary", "1", "2", true)], openedAt);
         discrepancy.EscalateToCase(null);
         var c = Domain.Cases.ResolutionCase.Open(tenantId, discrepancy.Id, run.Id, title, priority, null, null, openedAt);

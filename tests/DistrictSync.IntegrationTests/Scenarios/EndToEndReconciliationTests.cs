@@ -80,19 +80,20 @@ public class EndToEndReconciliationTests(DistrictSyncStack stack)
     {
         var client = await stack.ClientForAsync("northgate", "alice");
         var sources = (await client.GetFromJsonAsync<List<SourceSystemDto>>("/api/v1/source-systems", Ct))!;
-        var hr = sources.Single(s => s.Code == "HR");
+        var directory = sources.Single(s => s.Code == "DIRECTORY");
 
-        // Unique content so this scenario cannot collide with uploads made by other scenarios in the shared stack.
+        // Unique content, loaded into a source the end-to-end scenario does not use: scenarios share one stack and
+        // snapshot loads soft-delete rows they no longer contain, so sharing a source would make results order-dependent.
         var unique = $"E{Guid.NewGuid():N}"[..12];
         var csv = Encoding.UTF8.GetBytes(
             "employee_id,work_email,first_name,last_name,department,job_title,annual_salary,phone,status,hire_date,last_modified\n" +
             $"{unique},{unique.ToLowerInvariant()}@northgate.edu,Uni,Que,IT,Analyst,50000,555-010-0000,Active,2020-01-01,2026-10-01T09:00:00Z\n");
 
-        var first = await UploadBytesAsync(client, hr.Id, "unique.csv", csv);
+        var first = await UploadBytesAsync(client, directory.Id, "unique.csv", csv);
         var done = await DistrictSyncStack.WaitUntilAsync(() => client.GetFromJsonAsync<IngestionBatchDto>($"/api/v1/ingestion/batches/{first.Id}", Ct)!, b => b!.Status is "Completed" or "Failed", what: "first upload");
         done!.Status.ShouldBe("Completed", done.FailureReason);
 
-        var second = await UploadBytesAsync(client, hr.Id, "unique.csv", csv);
+        var second = await UploadBytesAsync(client, directory.Id, "unique.csv", csv);
         second.Status.ShouldBe("Duplicate");
         second.FailureReason!.ShouldContain(first.Id.ToString("D"));
     }
