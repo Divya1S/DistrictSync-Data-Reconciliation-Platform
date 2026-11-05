@@ -1,0 +1,3 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Integration events (RabbitMQ) and API DTOs shared by Api, Worker and tests. -->
+</Project>

@@ -1,0 +1,9 @@
+employee_id,work_email,first_name,last_name,department,job_title,annual_salary,phone,status,hire_date,last_modified
+E0001,ava.lee@northgate.edu,Ava,Lee,Teaching,Teacher,61500,555-010-1001,Active,2019-08-15,2026-10-01T09:00:00Z
+E0002,liam.patel@northgate.edu,Liam,Patel,Teaching,Lead Teacher,72000,555-010-1002,Active,2015-08-15,2026-10-01T09:00:00Z
+E0003,noah.garcia@northgate.edu,Noah,Garcia,Transportation,Bus Driver,41000,555-010-1003,Active,2021-01-10,2026-10-01T09:00:00Z
+E0004,emma.nguyen@northgate.edu,Emma,Nguyen,Administration,Clerk,45000,555-010-1004,Terminated,2018-03-01,2026-09-15T09:00:00Z
+E0005,olivia.smith@northgate.edu,Olivia,Smith,IT,Analyst,68000,555-010-1005,Active,2026-10-20,2026-10-21T09:00:00Z
+E0006,mateo.okafor@northgate.edu,Mateo,Okafor,Facilities,Custodian,39000,555-010-1006,Active,2017-06-01,2026-10-01T09:00:00Z
+E0007,sofia.kim@northgate.edu,Sofia,Kim,Counseling,Counselor,58000,555-010-1007,Active,2020-08-15,2026-10-01T09:00:00Z
+E0008,aiden.rossi@northgate.edu,Aiden,Rossi,Athletics,Coach,52000,555-010-1008,Active,2016-08-15,2026-10-01T09:00:00Z

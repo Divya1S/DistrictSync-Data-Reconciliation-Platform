@@ -1,0 +1,21 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DistrictSync.Api/DistrictSync.Api.csproj" />
+    <Project Path="src/DistrictSync.AppHost/DistrictSync.AppHost.csproj" />
+    <Project Path="src/DistrictSync.Application/DistrictSync.Application.csproj" />
+    <Project Path="src/DistrictSync.Contracts/DistrictSync.Contracts.csproj" />
+    <Project Path="src/DistrictSync.Domain/DistrictSync.Domain.csproj" />
+    <Project Path="src/DistrictSync.Infrastructure/DistrictSync.Infrastructure.csproj" />
+    <Project Path="src/DistrictSync.ServiceDefaults/DistrictSync.ServiceDefaults.csproj" />
+    <Project Path="src/DistrictSync.Worker/DistrictSync.Worker.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DistrictSync.ArchitectureTests/DistrictSync.ArchitectureTests.csproj" />
+    <Project Path="tests/DistrictSync.Benchmarks/DistrictSync.Benchmarks.csproj" />
+    <Project Path="tests/DistrictSync.IntegrationTests/DistrictSync.IntegrationTests.csproj" />
+    <Project Path="tests/DistrictSync.UnitTests/DistrictSync.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/DistrictSync.DataGen/DistrictSync.DataGen.csproj" />
+  </Folder>
+</Solution>

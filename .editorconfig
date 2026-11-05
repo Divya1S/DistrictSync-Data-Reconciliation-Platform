@@ -1,0 +1,74 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+[*.{json,yml,yaml,md,csproj,props,targets,slnx,xml}]
+indent_size = 2
+
+[*.{ts,tsx,js,jsx,css,html}]
+indent_size = 2
+
+[*.cs]
+# Style
+csharp_style_namespace_declarations = file_scoped:warning
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = true:suggestion
+csharp_prefer_braces = true:warning
+csharp_style_prefer_primary_constructors = true:suggestion
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+csharp_using_directive_placement = outside_namespace:warning
+dotnet_sort_system_directives_first = true
+dotnet_style_qualification_for_field = false:warning
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:warning
+dotnet_style_readonly_field = true:warning
+
+# Naming: private fields _camelCase
+dotnet_naming_rule.private_fields_underscore.severity = warning
+dotnet_naming_rule.private_fields_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_underscore.style = underscore_camel
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_style.underscore_camel.required_prefix = _
+dotnet_naming_style.underscore_camel.capitalization = camel_case
+
+# Analyzer tuning
+dotnet_diagnostic.CA1848.severity = none   # LoggerMessage delegates: fine for an app of this size
+dotnet_diagnostic.CA2007.severity = none   # ConfigureAwait not needed in app code
+dotnet_diagnostic.CA1031.severity = none   # catching general exceptions is intentional at process boundaries
+dotnet_diagnostic.CA1812.severity = none   # DI-instantiated classes
+dotnet_diagnostic.CA1515.severity = none   # public types in test projects are fine
+dotnet_diagnostic.CA1062.severity = none   # nullable reference types cover this
+dotnet_diagnostic.CA1716.severity = none
+dotnet_diagnostic.CA1724.severity = none
+dotnet_diagnostic.CA1308.severity = none   # ToLowerInvariant for normalization is intentional
+dotnet_diagnostic.CA5394.severity = none   # Random for test data generation
+dotnet_diagnostic.CA1819.severity = none   # byte[] RowVersion properties are the EF Core concurrency idiom
+dotnet_diagnostic.CA1054.severity = none   # URIs as strings are fine for configuration
+dotnet_diagnostic.CA1055.severity = none
+dotnet_diagnostic.CA1056.severity = none
+dotnet_diagnostic.CA1040.severity = none   # marker interfaces (IDomainEvent, IIntegrationEvent)
+dotnet_diagnostic.CA1032.severity = none   # exceptions carry domain data, not all standard ctors
+dotnet_diagnostic.CA2227.severity = none   # EF-mapped collections
+dotnet_diagnostic.CA1002.severity = none
+dotnet_diagnostic.CA1711.severity = none
+dotnet_diagnostic.CA1720.severity = none
+dotnet_diagnostic.CA1034.severity = none   # nested result/option types
+dotnet_diagnostic.CA1000.severity = none
+dotnet_diagnostic.CA1024.severity = none
+dotnet_diagnostic.CA1510.severity = warning
+dotnet_diagnostic.CA2254.severity = warning  # log templates must be static (no interpolation)
+dotnet_diagnostic.CA1873.severity = none   # boxing enum args in log calls is not worth guarding here
+
+# EF Core migrations are generated code
+[**/Migrations/*.cs]
+generated_code = true
+dotnet_analyzer_diagnostic.severity = none
+dotnet_diagnostic.IDE0161.severity = none
+dotnet_diagnostic.IDE0005.severity = none

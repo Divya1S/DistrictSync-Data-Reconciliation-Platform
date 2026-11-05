@@ -1,0 +1,39 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.swp
+.vs/
+*.DotSettings.user
+TestResults/
+BenchmarkDotNet.Artifacts/
+*.received.*
+coverage/
+*.coverage
+*.trx
+
+# Aspire / secrets
+.aspire/
+*.secrets.json
+appsettings.*.local.json
+
+# Node / React
+node_modules/
+dist/
+.vite/
+*.local
+npm-debug.log*
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# Runtime artifacts
+.staging/
+logs/

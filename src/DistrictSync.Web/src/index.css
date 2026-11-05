@@ -1,0 +1,194 @@
+@import "tailwindcss";
+
+/* Dark mode is class-driven so the in-app toggle can override the OS preference. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+  --bg: #f4f4f1;
+  --surface: #fcfcfb;
+  --surface-2: #f0efec;
+  --surface-3: #e7e6e1;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #898781;
+  --line: #e1e0d9;
+  --line-2: #c3c2b7;
+  --accent: #1c5cab;
+  --accent-hover: #184f95;
+  --accent-soft: #cde2fb;
+  --on-accent: #ffffff;
+  --good: #0ca30c;
+  --good-ink: #006300;
+  --warn: #fab219;
+  --warn-ink: #7a5200;
+  --serious: #ec835a;
+  --serious-ink: #9a3b14;
+  --crit: #d03b3b;
+  --crit-ink: #a42727;
+  --violet: #6250d6;
+  --violet-ink: #4a3aa7;
+  --focus: #2a78d6;
+  --shadow: 0 1px 2px rgba(11, 11, 11, 0.06), 0 4px 16px rgba(11, 11, 11, 0.06);
+}
+
+.dark {
+  color-scheme: dark;
+  --bg: #0d0d0d;
+  --surface: #1a1a19;
+  --surface-2: #232322;
+  --surface-3: #2c2c2a;
+  --ink: #f0efec;
+  --ink-2: #c3c2b7;
+  --muted: #898781;
+  --line: #2c2c2a;
+  --line-2: #383835;
+  --accent: #3987e5;
+  --accent-hover: #5598e7;
+  --accent-soft: #10325c;
+  --on-accent: #ffffff;
+  --good: #0ca30c;
+  --good-ink: #5ed15e;
+  --warn: #fab219;
+  --warn-ink: #fcc95b;
+  --serious: #ec835a;
+  --serious-ink: #f3a98b;
+  --crit: #d03b3b;
+  --crit-ink: #ef7a7a;
+  --violet: #9085e9;
+  --violet-ink: #b3abf1;
+  --focus: #5598e7;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+@theme inline {
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
+  --color-good: var(--good);
+  --color-good-ink: var(--good-ink);
+  --color-warn: var(--warn);
+  --color-warn-ink: var(--warn-ink);
+  --color-serious: var(--serious);
+  --color-serious-ink: var(--serious-ink);
+  --color-crit: var(--crit);
+  --color-crit-ink: var(--crit-ink);
+  --color-violet: var(--violet);
+  --color-violet-ink: var(--violet-ink);
+  --color-focus: var(--focus);
+
+  --shadow-card: var(--shadow);
+}
+
+@layer base {
+  html {
+    font-size: 14px;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-bg text-ink font-sans antialiased;
+    min-height: 100dvh;
+  }
+  * {
+    border-color: var(--line);
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--accent-soft);
+  }
+  code, kbd, pre, .font-mono {
+    font-variant-ligatures: none;
+  }
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.45);
+  }
+  input[type="number"]::-webkit-inner-spin-button {
+    opacity: 1;
+  }
+}
+
+/* Registered as a utility so it can be composed with @apply and used in markup alike. */
+@utility scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-2) transparent;
+}
+
+@layer components {
+  .card {
+    @apply bg-surface border border-line rounded-lg shadow-card;
+  }
+  .field {
+    @apply w-full rounded-md border border-line-2 bg-surface px-2.5 py-1.5 text-sm text-ink placeholder:text-muted
+      focus:border-accent focus:outline-none focus:ring-2 focus:ring-focus/30 disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+  .field-invalid {
+    @apply border-crit focus:border-crit focus:ring-crit/30;
+  }
+  .mono {
+    @apply font-mono text-[0.8125rem];
+  }
+  .skeleton {
+    @apply animate-pulse rounded bg-surface-3;
+  }
+  .table-wrap {
+    @apply relative overflow-auto scroll-thin;
+  }
+  .table-wrap thead th {
+    @apply sticky top-0 z-10 bg-surface-2 text-left text-xs font-semibold uppercase tracking-wide text-ink-2 px-3 py-2 border-b border-line whitespace-nowrap;
+  }
+  .table-wrap tbody td {
+    @apply px-3 py-2 border-b border-line align-middle;
+  }
+  .table-wrap tbody tr:last-child td {
+    @apply border-b-0;
+  }
+  .table-wrap tbody tr.row-clickable {
+    @apply cursor-pointer hover:bg-surface-2;
+  }
+  .nav-link {
+    @apply flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-ink-2 hover:bg-surface-2 hover:text-ink transition-colors;
+  }
+  .nav-link[aria-current="page"] {
+    @apply bg-accent-soft text-accent;
+  }
+  .kbd {
+    @apply inline-block rounded border border-line-2 bg-surface-2 px-1.5 py-0.5 font-mono text-[11px] text-ink-2;
+  }
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.toast-enter { animation: toast-in 160ms ease-out; }
+
+@keyframes indeterminate {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+.progress-indeterminate { animation: indeterminate 1.4s ease-in-out infinite; width: 40%; }
+
+/* Recharts chrome follows the theme. */
+.recharts-cartesian-axis-tick text { fill: var(--muted); font-size: 11px; }
+.recharts-cartesian-grid line { stroke: var(--line); }
+.recharts-cartesian-axis line { stroke: var(--line-2); }
+.recharts-legend-item-text { color: var(--ink-2) !important; font-size: 12px; }

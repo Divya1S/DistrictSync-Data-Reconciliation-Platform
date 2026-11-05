@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  backend:
+    name: Backend · build, unit & architecture tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Restore
+        run: dotnet restore DistrictSync.slnx
+      - name: Build (warnings as errors)
+        run: dotnet build DistrictSync.slnx --no-restore --configuration Release
+      - name: Unit tests
+        run: dotnet test tests/DistrictSync.UnitTests --no-build --configuration Release --report-xunit-trx --results-directory TestResults/unit
+      - name: Architecture tests
+        run: dotnet test tests/DistrictSync.ArchitectureTests --no-build --configuration Release --report-xunit-trx --results-directory TestResults/arch
+      - name: Verify EF Core model has no pending migration
+        run: |
+          dotnet tool restore
+          dotnet ef migrations has-pending-model-changes --project src/DistrictSync.Infrastructure --startup-project src/DistrictSync.Infrastructure --no-build --configuration Release
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-test-results
+          path: TestResults/**/*.trx
+
+  integration:
+    name: Backend · integration tests (SQL Server, RabbitMQ, Redis via Testcontainers)
+    runs-on: ubuntu-latest
+    needs: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Integration tests
+        run: dotnet test tests/DistrictSync.IntegrationTests --configuration Release --report-xunit-trx --results-directory TestResults/integration
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-results
+          path: TestResults/**/*.trx
+
+  frontend:
+    name: Frontend · lint & build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/DistrictSync.Web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: src/DistrictSync.Web/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
